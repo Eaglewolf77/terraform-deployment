@@ -1,13 +1,48 @@
-name: 'Terraform Deploy'
+name: 'Terraform Deploy & Destroy'
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:   # Tillåter manuell trigger
 
 jobs:
-  terraform:
+  deploy:
     runs-on: ubuntu-latest
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start Timer
+        run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve
+
+      - name: End Timer & Report
+        run: |
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+          echo "✅ Terraform deployment took $DURATION seconds"
+
+  destroy:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
     env:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
@@ -23,9 +58,5 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Plan
-        run: terraform plan
-
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
-        run: terraform apply -auto-approve
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
