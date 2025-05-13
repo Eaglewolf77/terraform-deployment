@@ -10,6 +10,8 @@ variable "resource_group_name" {
   default = "tf-test-rg"
 }
 
+data "azurerm_client_config" "current" {}
+
 resource "azurerm_resource_group" "rg" {
   name     = var.resource_group_name
   location = var.location
@@ -35,35 +37,99 @@ resource "azurerm_network_security_group" "nsg" {
   resource_group_name = azurerm_resource_group.rg.name
 }
 
-resource "azurerm_public_ip" "public_ip" {
+resource "azurerm_public_ip" "jumpbox_ip" {
   name                = "tf-jumpbox-ip"
-  location            = azurerm_resource_group.rg.location
+  location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
   allocation_method   = "Dynamic"
 }
 
-resource "azurerm_network_interface" "nic" {
+resource "azurerm_network_interface" "jumpbox_nic" {
   name                = "tf-jumpbox-nic"
-  location            = azurerm_resource_group.rg.location
+  location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
 
   ip_configuration {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.public_ip.id
+    public_ip_address_id          = azurerm_public_ip.jumpbox_ip.id
   }
 }
 
 resource "azurerm_linux_virtual_machine" "jumpbox" {
   name                = "tf-jumpbox"
   resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
+  location            = var.location
   size                = "Standard_B2s"
   admin_username      = "azureuser"
 
   network_interface_ids = [
-    azurerm_network_interface.nic.id,
+    azurerm_network_interface.jumpbox_nic.id,
+  ]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
+
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = file("~/.ssh/id_rsa.pub")
+  }
+}
+
+resource "azurerm_public_ip" "web_ip" {
+  name                = "tf-web-lb-ip"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+
+resource "azurerm_lb" "web_lb" {
+  name                = "tf-web-lb"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+  sku                 = "Standard"
+
+  frontend_ip_configuration {
+    name                 = "PublicIPAddress"
+    public_ip_address_id = azurerm_public_ip.web_ip.id
+  }
+}
+
+resource "azurerm_network_interface" "web_nic" {
+  name                = "tf-webserver-nic"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.subnet.id
+    private_ip_address_allocation = "Dynamic"
+    load_balancer_backend_address_pools_ids = [
+      azurerm_lb.web_lb.backend_address_pool[0].id
+    ]
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "webserver" {
+  name                = "tf-webserver"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = var.location
+  size                = "Standard_B2s"
+  admin_username      = "azureuser"
+
+  network_interface_ids = [
+    azurerm_network_interface.web_nic.id
   ]
 
   os_disk {
@@ -86,10 +152,15 @@ resource "azurerm_linux_virtual_machine" "jumpbox" {
 
 resource "azurerm_key_vault" "kv" {
   name                = "tf-keyvault-test"
-  location            = azurerm_resource_group.rg.location
+  location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
   tenant_id           = data.azurerm_client_config.current.tenant_id
   sku_name            = "standard"
 }
 
-data "azurerm_client_config" "current" {}
+resource "azurerm_automation_account" "automation" {
+  name                = "tf-automation"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+  sku_name            = "Basic"
+}
