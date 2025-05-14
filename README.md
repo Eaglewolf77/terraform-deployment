@@ -36,3 +36,4 @@ Detta repository är en del av mitt examensarbete inom Cloud & IT-Infrastructure
 ## Licens
 MIT License – se LICENSE-filen.
 # terraform-deployment
+# force refresh
