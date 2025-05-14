@@ -139,7 +139,6 @@ resource "azurerm_linux_virtual_machine" "jumpbox" {
     public_key = data.azurerm_key_vault_secret.ssh_key.value
   }
 }
-
 resource "azurerm_public_ip" "web_ip" {
   name                = "tf-web-lb-ip"
   location            = var.location
@@ -174,8 +173,13 @@ resource "azurerm_network_interface" "web_nic" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
-    load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.pool.id]
   }
+}
+
+resource "azurerm_network_interface_backend_address_pool_association" "web_nic_pool" {
+  network_interface_id    = azurerm_network_interface.web_nic.id
+  ip_configuration_name   = "internal"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.pool.id
 }
 
 resource "azurerm_linux_virtual_machine" "webserver" {
