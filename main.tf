@@ -161,9 +161,8 @@ resource "azurerm_lb" "web_lb" {
 }
 
 resource "azurerm_lb_backend_address_pool" "pool" {
-  name                = "tf-web-lb-pool"
-  loadbalancer_id     = azurerm_lb.web_lb.id
-  resource_group_name = azurerm_resource_group.rg.name
+  name            = "tf-web-lb-pool"
+  loadbalancer_id = azurerm_lb.web_lb.id
 }
 
 resource "azurerm_network_interface" "web_nic" {
@@ -175,10 +174,7 @@ resource "azurerm_network_interface" "web_nic" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
-
-    load_balancer_backend_address_pools {
-      id = azurerm_lb_backend_address_pool.pool.id
-    }
+    load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.pool.id]
   }
 }
 
