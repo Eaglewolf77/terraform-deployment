@@ -99,7 +99,6 @@ resource "azurerm_network_interface" "web_nic" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.web_subnet.id
     private_ip_address_allocation = "Dynamic"
-    # 🚨 Public IP är nu borttagen från NIC
   }
 }
 
@@ -132,8 +131,8 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   source_image_reference {
     publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "20_04-lts"
+    offer     = "0001-com-ubuntu-server-focal"
+    sku       = "20_04-lts-gen2"
     version   = "latest"
   }
 }
