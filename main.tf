@@ -20,6 +20,10 @@ variable "resource_group_name" {
   default = "tf-test-rg"
 }
 
+variable "ssh_public_key" {
+  description = "Public SSH key for VM login"
+}
+
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_resource_group" "rg" {
@@ -88,8 +92,14 @@ resource "azurerm_key_vault" "kv" {
   sku_name            = "standard"
 }
 
-data "azurerm_key_vault_secret" "ssh_key" {
+resource "azurerm_key_vault_secret" "ssh_key_secret" {
   name         = "sshpublickey"
+  value        = var.ssh_public_key
+  key_vault_id = azurerm_key_vault.kv.id
+}
+
+data "azurerm_key_vault_secret" "ssh_key" {
+  name         = azurerm_key_vault_secret.ssh_key_secret.name
   key_vault_id = azurerm_key_vault.kv.id
 }
 
@@ -97,7 +107,8 @@ resource "azurerm_public_ip" "jumpbox_ip" {
   name                = "tf-jumpbox-ip"
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
+  sku                 = "Standard"
 }
 
 resource "azurerm_network_interface" "jumpbox_nic" {
