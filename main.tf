@@ -2,10 +2,9 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.0"
+      version = "~> 4.0"
     }
   }
-
   required_version = ">= 1.5"
 }
 
@@ -161,6 +160,12 @@ resource "azurerm_lb" "web_lb" {
   }
 }
 
+resource "azurerm_lb_backend_address_pool" "pool" {
+  name                = "tf-web-lb-pool"
+  loadbalancer_id     = azurerm_lb.web_lb.id
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
 resource "azurerm_network_interface" "web_nic" {
   name                = "tf-webserver-nic"
   location            = var.location
@@ -170,9 +175,10 @@ resource "azurerm_network_interface" "web_nic" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
-    load_balancer_backend_address_pools_ids = [
-      azurerm_lb.web_lb.backend_address_pool[0].id
-    ]
+
+    load_balancer_backend_address_pools {
+      id = azurerm_lb_backend_address_pool.pool.id
+    }
   }
 }
 
