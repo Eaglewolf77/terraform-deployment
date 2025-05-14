@@ -8,7 +8,7 @@ Syftet är att med hjälp av Infrastructure as Code (IaC) skapa och jämföra tv
 ## Infrastruktur
 Följande resurser provisioneras:
 - Resource Group
-- Virtual Network + Subnets
+- Virtual Network ++ Subnets
 - Jumpbox Linux VM
 - Web Frontend Linux VM
 - Azure Load Balancer
