@@ -8,7 +8,7 @@ terraform {
 
   backend "azurerm" {
     resource_group_name  = "tf-backend-rg"
-    storage_account_name = "tfbackendstorageaccount"
+    storage_account_name = "tfbackendstorage7791"
     container_name       = "tfstate"
     key                  = "terraform-infra.tfstate"
   }
@@ -26,6 +26,7 @@ variable "client_id" {}
 variable "client_secret" {}
 variable "tenant_id" {}
 variable "subscription_id" {}
+
 resource "azurerm_resource_group" "rg" {
   name     = "tf-test-rg"
   location = "swedencentral"
