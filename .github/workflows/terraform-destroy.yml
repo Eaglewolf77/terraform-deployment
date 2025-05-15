@@ -16,36 +16,20 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Azure CLI login (manual classic SP)
-      run: |
-        az login --service-principal \
-                 --username ${{ secrets.AZURE_CLIENT_ID }} \
-                 --password ${{ secrets.AZURE_CLIENT_SECRET }} \
-                 --tenant ${{ secrets.AZURE_TENANT_ID }}
+      - name: Azure CLI login (manual classic SP)
+        run: |
+          az login --service-principal \
+                   --username ${{ secrets.AZURE_CLIENT_ID }} \
+                   --password ${{ secrets.AZURE_CLIENT_SECRET }} \
+                   --tenant ${{ secrets.AZURE_TENANT_ID }}
 
-    - name: Install Terraform
-      uses: hashicorp/setup-terraform@v3
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
 
-    - name: Start Timer
-      run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
+      - name: Terraform Init
+        run: cd terraform-infra && terraform init
 
-    - name: Terraform Destroy - Infra
-      run: |
-        cd terraform-infra
-        terraform init
-        terraform destroy --auto-approve
-
-    - name: Terraform Destroy - Secrets
-      run: |
-        cd ../terraform-secrets
-        terraform init
-        terraform destroy --auto-approve -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
-
-    - name: End Timer & Report
-      run: |
-        END_TIME=$(date +%s)
-        DURATION=$((END_TIME - START_TIME))
-        echo "✅ Terraform destroy took $DURATION seconds"
+      - name: Terraform Destroy
+        run: cd terraform-infra && terraform destroy --auto-approve -var="ssh_public_key=dummy"
