@@ -32,4 +32,4 @@ jobs:
       run: cd terraform-infra && terraform init
 
     - name: Terraform Apply
-      run: cd terraform-infra && terraform apply --auto-approve -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+      run: cd terraform-infra && terraform apply --auto-approve -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" -var="client_id=${{ secrets.AZURE_CLIENT_ID }}" -var="client_secret=${{ secrets.AZURE_CLIENT_SECRET }}" -var="tenant_id=${{ secrets.AZURE_TENANT_ID }}" -var="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
