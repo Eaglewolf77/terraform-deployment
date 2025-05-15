@@ -205,16 +205,3 @@ resource "azurerm_linux_virtual_machine" "jumpbox_vm" {
     version   = "latest"
   }
 }
-
-# ➡️ NYTT block: Random ID för suffix
-resource "random_id" "automation_suffix" {
-  byte_length = 4
-}
-
-# ➡️ Automation account
-resource "azurerm_automation_account" "automation" {
-  name                = "tf-automation-${random_id.automation_suffix.hex}"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  sku_name            = "Basic"
-}
