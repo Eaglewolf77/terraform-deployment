@@ -26,6 +26,9 @@ variable "client_id" {}
 variable "client_secret" {}
 variable "tenant_id" {}
 variable "subscription_id" {}
+variable "ssh_public_key" {}
+variable "client_object_id" {}
+
 resource "azurerm_resource_group" "rg" {
   name     = "tf-test-rg"
   location = "swedencentral"
@@ -151,6 +154,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
     version   = "latest"
   }
 }
+
 resource "azurerm_public_ip" "jumpbox_ip" {
   name                = "tf-jumpbox-ip"
   location            = azurerm_resource_group.rg.location
@@ -200,12 +204,16 @@ resource "azurerm_linux_virtual_machine" "jumpbox_vm" {
     version   = "latest"
   }
 }
+
 resource "azurerm_key_vault" "kv" {
   name                        = "keyvault-kv-cloud23"
   location                    = azurerm_resource_group.rg.location
   resource_group_name         = azurerm_resource_group.rg.name
   tenant_id                   = var.tenant_id
   sku_name                    = "standard"
+
+  soft_delete_enabled         = false
+  purge_protection_enabled    = false
 
   access_policy {
     tenant_id = var.tenant_id
@@ -218,11 +226,12 @@ resource "azurerm_key_vault" "kv" {
     ]
   }
 }
+
 resource "azurerm_key_vault_access_policy" "sp_policy" {
   key_vault_id = azurerm_key_vault.kv.id
 
   tenant_id = var.tenant_id
-  object_id = var.client_object_id  # Det här måste du lägga till som en ny variable
+  object_id = var.client_object_id  
 
   secret_permissions = [
     "Get",
