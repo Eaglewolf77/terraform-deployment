@@ -151,11 +151,6 @@ resource "azurerm_linux_virtual_machine" "vm" {
     version   = "latest"
   }
 }
-
-# ------------------------------
-# New resources: Jumpbox + Automation
-# ------------------------------
-
 resource "azurerm_public_ip" "jumpbox_ip" {
   name                = "tf-jumpbox-ip"
   location            = azurerm_resource_group.rg.location
@@ -203,5 +198,23 @@ resource "azurerm_linux_virtual_machine" "jumpbox_vm" {
     offer     = "0001-com-ubuntu-server-focal"
     sku       = "20_04-lts-gen2"
     version   = "latest"
+  }
+}
+resource "azurerm_key_vault" "kv" {
+  name                        = "keyvault-kv-cloud23"
+  location                    = azurerm_resource_group.rg.location
+  resource_group_name         = azurerm_resource_group.rg.name
+  tenant_id                   = var.tenant_id
+  sku_name                    = "standard"
+
+  access_policy {
+    tenant_id = var.tenant_id
+    object_id = var.client_id
+
+    secret_permissions = [
+      "Get",
+      "Set",
+      "List"
+    ]
   }
 }
