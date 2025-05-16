@@ -16,20 +16,31 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
     - name: Azure CLI login (manual classic SP)
       run: |
         az login --service-principal \
-                 --username ${{ secrets.AZURE_CLIENT_ID }} \
-                 --password ${{ secrets.AZURE_CLIENT_SECRET }} \
-                 --tenant ${{ secrets.AZURE_TENANT_ID }}
+          --username "${{ secrets.AZURE_CLIENT_ID }}" \
+          --password "${{ secrets.AZURE_CLIENT_SECRET }}" \
+          --tenant "${{ secrets.AZURE_TENANT_ID }}"
 
     - name: Install Terraform
       uses: hashicorp/setup-terraform@v3
 
     - name: Terraform Init
-      run: cd terraform-infra && terraform init
+      run: |
+        cd terraform-infra
+        terraform init
 
     - name: Terraform Apply
-      run: cd terraform-infra && terraform apply --auto-approve -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" -var="client_id=${{ secrets.AZURE_CLIENT_ID }}" -var="client_secret=${{ secrets.AZURE_CLIENT_SECRET }}" -var="tenant_id=${{ secrets.AZURE_TENANT_ID }}" -var="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+      run: |
+        cd terraform-infra
+        terraform apply -input=false --auto-approve \
+          -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
+          -var="client_id=${{ secrets.AZURE_CLIENT_ID }}" \
+          -var="client_secret=${{ secrets.AZURE_CLIENT_SECRET }}" \
+          -var="tenant_id=${{ secrets.AZURE_TENANT_ID }}" \
+          -var="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+          -var="client_object_id=${{ secrets.AZURE_CLIENT_OBJECT_ID }}"
