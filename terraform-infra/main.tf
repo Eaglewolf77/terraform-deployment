@@ -218,3 +218,15 @@ resource "azurerm_key_vault" "kv" {
     ]
   }
 }
+resource "azurerm_key_vault_access_policy" "sp_policy" {
+  key_vault_id = azurerm_key_vault.kv.id
+
+  tenant_id = var.tenant_id
+  object_id = var.client_object_id  # Det här måste du lägga till som en ny variable
+
+  secret_permissions = [
+    "get",
+    "list",
+    "set"
+  ]
+}
