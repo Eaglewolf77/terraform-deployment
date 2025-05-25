@@ -1,3 +1,4 @@
+# Förberett för demo: Key Vault purge protection avstängd
 terraform {
   required_providers {
     azurerm = {
