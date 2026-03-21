@@ -41,6 +41,10 @@ The following resources are provisioned in Azure:
 - Extracted execution timing from GitHub Actions using GitHub CLI (`gh`)
 - Compared performance and workflow efficiency across IaC tools
 
+## Benchmark Results
+
+Results are available in the workflow logs:
+https://github.com/Eaglewolf77/terraform-deployment/actions
 ---
 
 ## Prerequisites
@@ -62,6 +66,8 @@ terraform init
 terraform plan
 terraform apply
 terraform destroy
+```
+
 Technologies
 Terraform
 Microsoft Azure
