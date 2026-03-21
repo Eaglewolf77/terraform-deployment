@@ -1,39 +1,76 @@
-# Terraform Deployment – Examensarbete
+# Cloud Infrastructure Automation (Terraform)
 
-Detta repository innehåller Terraform-konfigurationer för att automatiskt skapa en testmiljö i Microsoft Azure som en del av examensarbetet: **"Jämförelse av Bicep och Terraform för småföretag i Azure"**.
+This repository contains Terraform configurations used to deploy a complete Azure environment using Infrastructure as Code (IaC) and automated CI/CD pipelines in GitHub Actions.
 
-## Syfte
-Syftet är att med hjälp av Infrastructure as Code (IaC) skapa och jämföra två identiska infrastrukturer där Terraform används i detta repository.
+The project is part of a comparison between Terraform and Bicep, focusing on performance, workflow efficiency, and infrastructure lifecycle management.
 
-## Infrastruktur
-Följande resurser provisioneras:
+---
+
+## Architecture
+
+The following resources are provisioned in Azure:
+
 - Resource Group
-- Virtual Network + Subnets
-- Jumpbox Linux VM
-- Web Frontend Linux VM
+- Virtual Network with subnets
+- Linux Jumpbox VM
+- Linux Web Frontend VM
 - Azure Load Balancer
 - Azure Key Vault
 - Azure Automation Account
 - Network Security Groups (NSG)
 
-## Förutsättningar
+---
+
+## CI/CD & Automation
+
+- Fully automated deployments using GitHub Actions
+- Infrastructure lifecycle managed via:
+  - `terraform init`
+  - `terraform plan`
+  - `terraform apply`
+  - `terraform destroy`
+- Secure authentication using Azure Service Principal
+- Secrets managed in Azure Key Vault
+
+---
+
+## Benchmarking Approach
+
+- Performed multiple deployment and teardown cycles (10 runs)
+- Used identical infrastructure for Terraform and Bicep
+- Extracted execution timing from GitHub Actions using GitHub CLI (`gh`)
+- Compared performance and workflow efficiency across IaC tools
+
+---
+
+## Prerequisites
+
 - Azure Subscription
-- Service Principal (med Contributor role)
-- GitHub Actions Secrets:
+- Service Principal with Contributor role
+- GitHub Actions secrets:
   - `AZURE_CLIENT_ID`
   - `AZURE_CLIENT_SECRET`
   - `AZURE_SUBSCRIPTION_ID`
   - `AZURE_TENANT_ID`
 
-## Användning
-1. Forka eller klona repo:t
-2. Sätt dina GitHub Secrets
-3. Pusha till `main` → deployment körs automatiskt via GitHub Actions
+---
 
-## Examensarbete
-Detta repository är en del av mitt examensarbete inom Cloud & IT-Infrastructure Engineer-programmet och används för att jämföra Terraform med Bicep i en verklig Azure-miljö.
+## Usage
 
-## Licens
-MIT License – se LICENSE-filen.
-# terraform-deployment
-# force refresh
+```bash
+terraform init
+terraform plan
+terraform apply
+terraform destroy
+Technologies
+Terraform
+Microsoft Azure
+GitHub Actions
+GitHub CLI (gh)
+Azure CLI (az)
+Azure Key Vault
+
+License
+
+MIT License – see LICENSE file.
+
